@@ -1,0 +1,41 @@
+# Production Environment Configuration
+# Inherits from base config and overrides for production
+
+paths:
+  # Production paths (adjust as needed)
+  raw: "data/raw"
+  bronze: "lakehouse/prod/bronze/yellow_taxi_bronze"
+  silver: "lakehouse/prod/silver/yellow_taxi_silver"
+  gold_daily_kpis: "lakehouse/prod/gold/daily_kpis"
+  gold_zone_demand: "lakehouse/prod/gold/zone_demand"
+  dq_metrics: "lakehouse/prod/metadata/dq_metrics"
+  pipeline_runs: "lakehouse/prod/metadata/pipeline_runs"
+
+spark:
+  app_name: "NYC_Taxi_Lakehouse_ETL_PROD"
+  master: "local[*]"  # Change to cluster master in production
+
+data_quality:
+  # Strict DQ checks in production
+  fail_on_dq_errors: true
+  enable_schema_validation: true
+
+delta_optimization:
+  # Enable optimization in production
+  optimize_after_write: true
+
+incremental:
+  # Enable incremental processing in production
+  enabled: true
+  watermark_column: "tpep_pickup_datetime"
+
+vacuum:
+  # Enable VACUUM in production
+  enabled: true
+  retention_hours: 168  # 7 days
+
+partitioning:
+  enabled: true
+
+environment: "prod"
+
