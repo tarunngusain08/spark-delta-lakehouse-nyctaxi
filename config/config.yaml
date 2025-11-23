@@ -1,0 +1,108 @@
+# Data Lakehouse Configuration
+# Paths and settings for Bronze-Silver-Gold ETL pipeline
+
+paths:
+  # Raw input data location (CSV files)
+  raw: "data/raw"
+  
+  # Bronze layer (raw zone) - Delta table path
+  bronze: "lakehouse/bronze/yellow_taxi_bronze"
+  
+  # Silver layer (clean zone) - Delta table path
+  silver: "lakehouse/silver/yellow_taxi_silver"
+  
+  # Gold layer (analytics zone) - Delta table paths
+  gold_daily_kpis: "lakehouse/gold/daily_kpis"
+  gold_zone_demand: "lakehouse/gold/zone_demand"
+  
+  # Metadata and metrics tables
+  dq_metrics: "lakehouse/metadata/dq_metrics"
+  pipeline_runs: "lakehouse/metadata/pipeline_runs"
+  pipeline_metrics: "lakehouse/metadata/pipeline_metrics"
+
+# Spark configuration
+spark:
+  app_name: "NYC_Taxi_Lakehouse_ETL"
+  master: "local[*]"
+  
+# Data quality configuration
+data_quality:
+  # Range checks
+  min_trip_distance: 0.0
+  min_fare_amount: 0.0
+  min_total_amount: 0.0
+  
+  # Critical columns that must not be null
+  critical_columns:
+    - "tpep_pickup_datetime"
+    - "tpep_dropoff_datetime"
+  
+  # Row count expectations (optional)
+  expected_row_count:
+    min_rows: null  # Set to number for minimum expected rows
+    max_rows: null  # Set to number for maximum expected rows
+  
+  # Enable/disable schema validation
+  enable_schema_validation: true
+  
+  # Fail pipeline on DQ errors (vs warnings)
+  fail_on_dq_errors: true
+
+# Deduplication settings
+deduplication:
+  # Columns to use for deduplication in Silver layer
+  dedup_columns:
+    - "tpep_pickup_datetime"
+    - "tpep_dropoff_datetime"
+    - "vendorid"
+    - "total_amount"
+
+# Partitioning configuration
+partitioning:
+  # Enable partitioning for tables
+  enabled: true
+  # Partition column (typically date derived from timestamp)
+  bronze_partition_column: "trip_date"  # Will be derived from tpep_pickup_datetime
+  silver_partition_column: "trip_date"
+  gold_daily_kpis_partition_column: "trip_date"
+  gold_zone_demand_partition_column: "trip_date"
+
+# Delta Lake optimizations
+delta_optimization:
+  # Run OPTIMIZE after writes
+  optimize_after_write: true
+  # Z-ORDER columns for Bronze
+  bronze_z_order_columns:
+    - "pulocationid"
+    - "vendorid"
+  # Z-ORDER columns for Silver
+  silver_z_order_columns:
+    - "pulocationid"
+    - "trip_date"
+  # Z-ORDER columns for Gold Daily KPIs
+  gold_daily_kpis_z_order_columns:
+    - "trip_date"
+  # Z-ORDER columns for Gold Zone Demand
+  gold_zone_demand_z_order_columns:
+    - "trip_date"
+    - "pu_location_id"
+
+# Incremental processing
+incremental:
+  # Enable incremental processing (append mode instead of overwrite)
+  enabled: false
+  # Watermark column for incremental processing
+  watermark_column: "tpep_pickup_datetime"
+  # Process only data newer than this (for initial run)
+  initial_load_date: null  # Set to date string like "2023-01-01" for initial load
+
+# VACUUM configuration
+vacuum:
+  # Run VACUUM after optimization
+  enabled: false
+  # Retention period in hours (default: 168 = 7 days)
+  retention_hours: 168
+
+# Environment
+environment: "local"
+
