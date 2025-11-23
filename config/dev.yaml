@@ -1,0 +1,34 @@
+# Development Environment Configuration
+# Inherits from base config and overrides for dev environment
+
+paths:
+  # Use local paths for development
+  raw: "data/raw"
+  bronze: "lakehouse/dev/bronze/yellow_taxi_bronze"
+  silver: "lakehouse/dev/silver/yellow_taxi_silver"
+  gold_daily_kpis: "lakehouse/dev/gold/daily_kpis"
+  gold_zone_demand: "lakehouse/dev/gold/zone_demand"
+  dq_metrics: "lakehouse/dev/metadata/dq_metrics"
+  pipeline_runs: "lakehouse/dev/metadata/pipeline_runs"
+
+spark:
+  app_name: "NYC_Taxi_Lakehouse_ETL_DEV"
+  master: "local[*]"
+
+data_quality:
+  # More lenient DQ checks in dev
+  fail_on_dq_errors: false
+  enable_schema_validation: true
+
+delta_optimization:
+  # Disable optimization in dev for faster iteration
+  optimize_after_write: false
+
+incremental:
+  enabled: false
+
+vacuum:
+  enabled: false
+
+environment: "dev"
+
